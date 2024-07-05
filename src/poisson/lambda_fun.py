@@ -6,13 +6,12 @@ import numpy as np
 import calendar
 
 class lambdaSpline(nn.Module):
-    def __init__(self, order: int) -> None:
+    def __init__(self, order: int, promotion_init: float, poly_init: list[torch.Tensor]) -> None:
         """
         Args:
             order (int): for the polynoms to use
-
-        Raises:
-            ValueError: if poly's order is less then smoothness parameter
+            promotion_init (float): initial value for the promotion const
+            poly_init (list[torch.Tensor]): inital coef-vectors for the polynoms
         """
         super().__init__()
 
@@ -23,10 +22,10 @@ class lambdaSpline(nn.Module):
         self._polys = nn.ParameterList()
         for month in range(NUM_MONTHS):
             # poly's coeffs are from highest to lowest
-            self._polys.append(nn.Parameter(2 + torch.rand(order + 1, dtype=torch.float64), requires_grad=True))
+            self._polys.append(nn.Parameter(poly_init[month], requires_grad=True))
 
         # onpromotion constant, positive
-        self._promotion_c = nn.Parameter(torch.ones(1, dtype=torch.float64), requires_grad=True)
+        self._promotion_c = nn.Parameter(torch.DoubleTensor([promotion_init]), requires_grad=True)
 
         # compute number of days in each month for leap year
         # this will be enough for lambdas computations
