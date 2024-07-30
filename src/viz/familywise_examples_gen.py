@@ -1,12 +1,11 @@
-""" script saves several time series examples for each family
-    All dates are taken after 2015
+""" script saves several/all time series examples for each family
 """
-
-import pathlib
-import os
 import pandas as pd
 from matplotlib import pyplot as plt
 import numpy as np
+
+import pathlib
+from typing import Optional
 
 
 def getHolidayDates(store: int, holidays: pd.DataFrame, stores_info: pd.DataFrame):
@@ -15,8 +14,6 @@ def getHolidayDates(store: int, holidays: pd.DataFrame, stores_info: pd.DataFram
     store_state = store_info["state"].values[0]
 
     relevant_holidays = holidays.loc[
-        (pd.to_datetime("2015") <= pd.to_datetime(holidays["date"])) & 
-        (pd.to_datetime(holidays["date"]) <= pd.to_datetime("2017")) & 
         ((holidays["locale_name"] == store_city) | (holidays["locale_name"] == store_state) | 
          (holidays["locale"] == "National")),
          "date"
@@ -25,7 +22,7 @@ def getHolidayDates(store: int, holidays: pd.DataFrame, stores_info: pd.DataFram
     return relevant_holidays
 
 def genFamilywiseExamples(
-        examples_per_fam: int
+        examples_per_fam: Optional[int]
 ) -> None:
     pathlib.Path("img/examples").mkdir(exist_ok=True)
 
@@ -46,14 +43,15 @@ def genFamilywiseExamples(
         pathlib.Path(save_dir).mkdir(exist_ok=True)
 
         possible_stores: pd.Series = data.loc[data["family"] == family, "store_nbr"].unique()
-        # sample random stores
-        chosen_stores = np.random.choice(possible_stores, examples_per_fam, replace=False)
+        # sample random/all stores
+        if examples_per_fam is None:
+            chosen_stores = possible_stores
+        else:
+            chosen_stores = np.random.choice(possible_stores, examples_per_fam, replace=False)
 
         for store in chosen_stores:
             series = data.loc[
-                (data["family"] == family) & (data["store_nbr"] == store) & 
-                (pd.to_datetime("2015") <= pd.to_datetime(data["date"])) & 
-                (pd.to_datetime(data["date"]) <= pd.to_datetime("2017")),
+                (data["family"] == family) & (data["store_nbr"] == store),
                 ["date", "sales", "onpromotion"]
             ]
             on_promotion_points = series.loc[series["onpromotion"] > 0, ["date", "sales"]]
@@ -80,9 +78,7 @@ def genFamilywiseExamples(
             plt.close(fig)
 
 
-
-
 if __name__ == "__main__":
-    genFamilywiseExamples(5)
+    genFamilywiseExamples(examples_per_fam=None)
 
 

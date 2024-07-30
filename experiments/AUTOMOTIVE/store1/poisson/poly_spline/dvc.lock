@@ -1,0 +1,39 @@
+schema: '2.0'
+stages:
+  data_preprocessing:
+    cmd: python preprocess_stage.py
+    deps:
+    - path: ../../../../../data
+      hash: md5
+      md5: 53330c0085ee4d351c56e940dc13efef.dir
+      size: 124761708
+      nfiles: 7
+    - path: ../../../../../src/data/preprocessing.py
+      hash: md5
+      md5: 4cc8c49c38ccca73d718e498a704ea17
+      size: 2123
+    outs:
+    - path: exp_data
+      hash: md5
+      md5: 2ca943f5d5b0bc5454b946275fbe086b.dir
+      size: 77113
+      nfiles: 3
+  model_evaluation:
+    cmd: python evaluation_stage.py
+    deps:
+    - path: ../../../../../src/poisson
+      hash: md5
+      md5: 7f4ecdbe8a744888d7ad33a3ba23690e.dir
+      size: 30754
+      nfiles: 9
+    - path: exp_data
+      hash: md5
+      md5: 2ca943f5d5b0bc5454b946275fbe086b.dir
+      size: 77113
+      nfiles: 3
+    outs:
+    - path: results
+      hash: md5
+      md5: c6ccaf352c3619fb4c3f11d9d997cbbd.dir
+      size: 107973
+      nfiles: 6

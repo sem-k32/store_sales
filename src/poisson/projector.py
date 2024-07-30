@@ -1,15 +1,16 @@
 import torch
-from .lambda_fun import lambdaSpline
+from .lambda_fun import lambdaLinear, lambdaLinearSpline
+from typing import Union
 
 
 class smoothSplineProjector:
-    def __init__(self, lambda_spline: lambdaSpline, smoothness: int = 1) -> None:
+    def __init__(self, lambda_spline, smoothness: int = 1) -> None:
         """make splines satisfy smooth conditions in the end points
 
         Args:
             smoothness (int, optional): smoothness of the splines in the end points. Defaults to 1.
         """
-        self._lambda_spline: lambdaSpline = lambda_spline
+        self._lambda_spline = lambda_spline
         self._smooth = smoothness
 
         # build projection matrix
@@ -82,20 +83,20 @@ class smoothSplineProjector:
                 raise ValueError("Constraints violation")
 
 
-class posPolyCoefProjector:
-    def __init__(self, lambda_spline: lambdaSpline) -> None:
-        """ make poly's coefs positive. That's enough for resulting lambdas positivity
+class posCoefsProjector:
+    def __init__(self, lambda_func: Union[lambdaLinearSpline, lambdaLinear]) -> None:
+        """ make linear model's coefs positive. That must be enough for lambda's positivity
         """
-        self._lambda_spline: lambdaSpline = lambda_spline
+        self._lambda_func = lambda_func
 
     def Project(self) -> None:
-        state_dict = self._lambda_spline.state_dict()
+        state_dict = self._lambda_func.state_dict()
 
         for key in state_dict.keys():
             # promotion and polys coefs projection
             state_dict[key] *= (state_dict[key] >= 0)
 
-        self._lambda_spline.load_state_dict(state_dict)
+        self._lambda_func.load_state_dict(state_dict)
 
 
 

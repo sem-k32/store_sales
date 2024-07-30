@@ -8,33 +8,33 @@ from functools import reduce
 
 
 class PoissonRegr:
-    def __init__(self, lambda_computer: nn.Module, data_list: List[pd.DataFrame] = None) -> None:
-        self._lambd_func = lambda_computer
-        self._data_list = data_list
+    def __init__(self, lambda_func: nn.Module) -> None:
+        self._lambd_func = lambda_func
 
-    def setData(self, data_list: List[pd.DataFrame]) -> None:
-        self._data_list = data_list
+    def negLnLiklyhood(self, time_info: pd.DataFrame) -> torch.Tensor:
+        """compute data's negative log Liklyhood for given time period
 
-    def lnLiklyhood(self) -> torch.Tensor:
-        if self._data_list is None:
-            raise ValueError("No data set to compute liklyhood")
+        Args:
+            time_info (pd.DataFrame): sales in a given time + additional info
+        """
+        if time_info.size == 0:
+            raise ValueError("Given period info is empty")
 
-        output = 0
+        num_events = torch.from_numpy(
+            time_info["sales"].values.astype(np.float64)
+        )
+        lambdas: torch.Tensor = self._lambd_func(time_info)
 
-        # compute normalizing constant
-        num_data_obj = reduce(lambda num_obj, data: num_obj + data.shape[0], self._data_list, 0)
-        
-        for data in self._data_list:
-            num_events = torch.from_numpy(
-                data["sales"].values.astype(np.float64)
-            )
-            lambdas: torch.Tensor = self._lambd_func(data)
-
-            # normalized LH
-            output += torch.sum((num_events * torch.log(lambdas) - lambdas))
-
-        return output
+        return torch.sum((lambdas - num_events * torch.log(lambdas)))
     
-    def getLambdas(self, period_info: pd.DataFrame) -> torch.Tensor:
+    def getLambdas(self, time_info: pd.DataFrame) -> torch.Tensor:
+        """ compute lambda params for given time period. Useful for forecasting
+
+        Args:
+            time_info (pd.DataFrame): time period with additional info
+        """
+        if time_info.size == 0:
+            raise ValueError("Given period info is empty")
+        
         with torch.no_grad():
-            return self._lambd_func(period_info)
+            return self._lambd_func(time_info)
