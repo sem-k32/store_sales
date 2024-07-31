@@ -25,7 +25,7 @@ class PoissonRegr:
         )
         lambdas: torch.Tensor = self._lambd_func(time_info)
 
-        return torch.sum((lambdas - num_events * torch.log(lambdas)))
+        return torch.sum((lambdas - num_events * torch.log(lambdas)).nan_to_num(0, 0, 0))
     
     def getLambdas(self, time_info: pd.DataFrame) -> torch.Tensor:
         """ compute lambda params for given time period. Useful for forecasting

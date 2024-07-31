@@ -11,6 +11,7 @@ stages:
     deps:
     - ${WD}/src/data/preprocessing.py
     - ${WD}/data
+    - preprocess_stage.py
     outs:
     - ${data_dir}
   model_evaluation:
@@ -20,6 +21,7 @@ stages:
     deps:
     - ${data_dir}
     - ${WD}/src/poisson
+    - evaluation_stage.py
     outs:
     - ${eval_results_dir}
 metrics:

@@ -45,7 +45,7 @@ class lambdaLinearSpline(ABC, nn.Module):
 
             # new year law
             if cur_date.month == 1 and cur_date.day == 1:
-                output_lambdas[i] = 1e-9
+                output_lambdas[i] = 0
                 continue
 
             feature_vec = self._getFeatureVec(cur_date)
@@ -74,24 +74,23 @@ class lambdaPolySpline(lambdaLinearSpline):
         return torch.DoubleTensor([normed_time ** j for j in range(0, self._model_ord + 1)])
     
 
-class lambdaFourierSpline(lambdaLinearSpline):
+class lambdaCosineSpline(lambdaLinearSpline):
     def __init__(self, promotion_init: float, coefs_init: list[torch.DoubleTensor]):
         """linear model using harmonical features. Coefs goes: free coefs, sin coefs, cos coefs
         """
         super().__init__(promotion_init, coefs_init)
 
-        self._model_ord = (coefs_init[0].shape[0] - 1) // 2
+        self._model_ord = coefs_init[0].shape[0] - 1
 
     def _getFeatureVec(self, time: pd.Timestamp) -> torch.Tensor:
         # time is normed relative to number of days in a month
         normed_time = time.day / self._days_per_month[time.month - 1]
         fourier_freq = 2 * np.pi
 
-        # sin_coefs includes free ratio
-        sin_coefs = [np.sin(fourier_freq * j) for j in range(0, self._model_ord)]
-        cos_coefs = [np.cos(fourier_freq * j) for j in range(1, self._model_ord)]
+        # cos_coefs includes free ratio
+        cos_coefs = [np.cos(fourier_freq * j * normed_time) ** 2 for j in range(1, self._model_ord)]
 
-        return torch.DoubleTensor(sin_coefs + cos_coefs)
+        return torch.DoubleTensor(cos_coefs)
 
 
 # Linear models
@@ -118,22 +117,21 @@ class lambdaLinear(ABC, nn.Module):
 
     def forward(self, series: pd.DataFrame) -> torch.Tensor:
         num_time_points = series.shape[0]
-        output_lambdas = torch.empty(num_time_points, dtype=torch.float64, requires_grad=True)
+        output_lambdas = torch.empty(num_time_points, dtype=torch.float64)
 
         for i in range(num_time_points):
-            cur_date = pd.to_datetime(series.iloc[i, "date"])
-            num_promotion = torch.from_numpy(series.iloc[i, "onpromotion"].data).to(dtype=torch.float64)
+            cur_date = pd.to_datetime(series.iloc[i]["date"])
+            num_promotion = torch.DoubleTensor([series.iloc[i]["onpromotion"]])
 
             # new year law
-            if cur_date.month == 12 and cur_date.day == 31:
+            if cur_date.month == 1 and cur_date.day == 1:
                 output_lambdas[i] = 0
                 continue
 
             feature_vec = self._getFeatureVec(cur_date)
-            # days/months for lambdas start with zero
-            output_lambdas[i] = torch.dot(feature_vec, self._coefs)
-            # onpromotion bias
-            output_lambdas[i] += self._promotion_c * num_promotion
+            # days/months for lambdas start with zero, onpromotion bias
+            output_lambdas[i] = torch.dot(feature_vec, self._coefs) + self._promotion_c * num_promotion
+            pass
 
         return output_lambdas
     
@@ -152,21 +150,25 @@ class lambdaPoly(lambdaLinear):
         return torch.DoubleTensor([normed_time ** j for j in range(0, self._model_ord + 1)])
     
 
-class lambdaFourier(lambdaLinear):
+class lambdaCosine(lambdaLinear):
     def __init__(self, promotion_init: float, coefs_init: torch.DoubleTensor):
         """linear model using harmonical features. Coefs goes: free coefs, sin coefs, cos coefs
         """
         super().__init__(promotion_init, coefs_init)
 
-        self._model_ord = (coefs_init[0].shape[0] - 1) // 2
+        self._model_ord = coefs_init.shape[0] - 1
 
     def _getFeatureVec(self, time: pd.Timestamp) -> torch.Tensor:
         # time is normed relative to number of days in a month
         normed_time = time.dayofyear / (365 + time.is_leap_year)
         fourier_freq = 2 * np.pi
 
-        # sin_coefs includes free ratio
-        sin_coefs = [np.sin(fourier_freq * j) for j in range(0, self._model_ord)]
-        cos_coefs = [np.cos(fourier_freq * j) for j in range(1, self._model_ord)]
+        # cos coefs includes free ratio
+        sin_coefs = [np.cos(fourier_freq * j * normed_time) ** 2 for j in range(0, self._model_ord + 1)]
 
-        return torch.DoubleTensor(sin_coefs + cos_coefs)
+        return torch.DoubleTensor(sin_coefs)
+    
+
+# Models using abs()
+
+...

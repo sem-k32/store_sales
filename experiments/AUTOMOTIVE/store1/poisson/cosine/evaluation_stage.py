@@ -14,7 +14,7 @@ import pickle
 from yaml import full_load
 
 # src is already in PYTHONPATH
-from src.poisson.lambda_fun import lambdaPolySpline
+from src.poisson.lambda_fun import lambdaCosine
 from src.poisson.projector import posCoefsProjector
 from src.poisson.regression import PoissonRegr
 from src.poisson.trainer import Trainer
@@ -23,12 +23,9 @@ from src.poisson.trainer import Trainer
 def promotionInitializer() -> float:
     return 1.0
 
-def polyInitializer(order: int) -> list[torch.Tensor]:
-    NUM_MONTHS = 12
-    return [
-        1 + torch.rand(order + 1, dtype=torch.float64)
-        for _ in range(NUM_MONTHS)
-    ]
+def fouirierInitializer(order: int) -> torch.Tensor:
+    #return 1 + torch.rand(2 * order + 1, dtype=torch.float64)
+    return torch.ones(order + 1, dtype=torch.float64)
 
 def paramsNormGradient(lambda_func) -> float:
     with torch.no_grad():
@@ -49,14 +46,14 @@ if __name__ == "__main__":
     validate_data = pd.read_csv("exp_data/validate.csv")
 
     # init model
-    lambda_func = lambdaPolySpline(
+    lambda_func = lambdaCosine(
         promotionInitializer(),
-        polyInitializer(params_dict["poly_ord"])
+        fouirierInitializer(params_dict["model_ord"])
     )
     regressor = PoissonRegr(lambda_func)
 
     # optimizer
-    optimizer = optim.SGD(lambda_func.parameters(), lr=params_dict["lr"])
+    optimizer = optim.SGD(lambda_func.parameters(), lr=params_dict["lr"], momentum=0.2)
     # constant lr
     lr_sched = LambdaLR(optimizer, lambda epoch: params_dict["lr"])
     # model's params projector
@@ -90,8 +87,40 @@ if __name__ == "__main__":
 
             logger.next_step()
 
+            if epoch % 5 == 0:
+                # vizualize solution
+                observations = validate_data["sales"].values
+                prediction = regressor.getLambdas(validate_data).numpy()
+                pred_dates = validate_data["date"].values.astype("datetime64")
+
+                fig, ax = plt.subplots(figsize=(10, 6))
+
+                ax.plot(pred_dates, observations, label="observe")
+                ax.plot(pred_dates, prediction, label="predict", color="red")
+                ax.fill_between(pred_dates, prediction - np.sqrt(prediction), prediction + np.sqrt(prediction), 
+                                color="orange", alpha=0.6, label="predict_dispersion"
+                )
+
+                ax.grid(True)
+                ax.legend()
+                ax.set_xlabel("t")
+                ax.set_ylabel("Sales")
+
+                logger.log_image(f"prediction_{epoch}.png", fig)
+
+                # print model's coefs
+                model_state_dict = lambda_func.state_dict()
+                for key, param in model_state_dict.items():
+                    print(key, param)
+
     # train model
     trainer.Train(train_callback)
+    
+    # print model's coefs
+    print("Final coefs")
+    model_state_dict = lambda_func.state_dict()
+    for key, param in model_state_dict.items():
+        print(key, param)
 
     # vizualize solution
 
@@ -111,9 +140,9 @@ if __name__ == "__main__":
     ax.legend()
     ax.set_xlabel("t")
     ax.set_ylabel("Sales")
+    ax.set_title("Final")
 
     logger.log_image("prediction.png", fig)
 
     # end evaluation stage
     logger.end()
-

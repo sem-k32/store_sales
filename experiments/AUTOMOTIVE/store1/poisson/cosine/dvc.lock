@@ -12,6 +12,10 @@ stages:
       hash: md5
       md5: 4cc8c49c38ccca73d718e498a704ea17
       size: 2123
+    - path: preprocess_stage.py
+      hash: md5
+      md5: 7d66c723f459fc1c17ae2a7b376405bb
+      size: 1814
     params:
       params.yaml:
         data_dir: exp_data
@@ -29,9 +33,13 @@ stages:
     deps:
     - path: ../../../../../src/poisson
       hash: md5
-      md5: cedafcd8ca54f17cb489892d5820f53e.dir
-      size: 30562
+      md5: d6efef1c37b6c63557dd713def3f1dec.dir
+      size: 30287
       nfiles: 9
+    - path: evaluation_stage.py
+      hash: md5
+      md5: edd21bb683872405324cf0be673ac7cd
+      size: 5021
     - path: exp_data
       hash: md5
       md5: 2ca943f5d5b0bc5454b946275fbe086b.dir
@@ -43,15 +51,15 @@ stages:
         data_dir: exp_data
         eval_results_dir: results
         family: AUTOMOTIVE
-        grad_tol: 0.01
-        lr: 0.1
-        max_epochs: 60
-        poly_ord: 9
+        grad_tol: 1
+        lr: 0.01
+        max_epochs: 50
+        model_ord: 20
         store_nbr: 1
         validate_data_date: 01-01-2017
     outs:
     - path: results
       hash: md5
-      md5: c34d69594dadfa4f971f9b50d0433ee8.dir
-      size: 104202
-      nfiles: 6
+      md5: 8933fe3f0d0f66cf2a0a4b8f14cfa52b.dir
+      size: 1228973
+      nfiles: 16
