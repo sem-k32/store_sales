@@ -165,23 +165,51 @@ class lambdaPoly(lambdaLinear):
 
 class lambdaCosine(lambdaLinear):
     def __init__(self, promotion_init: float, coefs_init: torch.DoubleTensor):
-        """linear model using harmonical features. Coefs goes: free coefs, sin coefs, cos coefs
+        """linear model using harmonical features. Coefs goes: free coefs, cos coefs
         """
         super().__init__(promotion_init, coefs_init)
 
         self._model_ord = coefs_init.shape[0] - 1
 
     def _getFeatureVec(self, time: pd.Timestamp) -> torch.Tensor:
-        # time is normed relative to number of days in a month
+        # time is normed relative to number of days in a year
         normed_time = time.dayofyear / (365 + time.is_leap_year)
         fourier_freq = 2 * np.pi
 
         # cos coefs includes free ratio
-        sin_coefs = [np.cos(fourier_freq * j * normed_time) ** 2 for j in range(0, self._model_ord + 1)]
+        cos_coefs = [np.cos(fourier_freq * j * normed_time) ** 2 for j in range(0, self._model_ord + 1)]
 
-        return torch.DoubleTensor(sin_coefs)
+        return torch.DoubleTensor(cos_coefs)
+    
+
+class lambdaFouirer(lambdaLinear):
+    def __init__(self, promotion_init: float, coefs_init: torch.DoubleTensor):
+        """linear model using harmonical features. Coefs goes: free coefs, cos coefs, sin coefs
+        """
+        super().__init__(promotion_init, coefs_init)
+
+        self._model_ord = (coefs_init.shape[0] - 1) // 2
+
+    def _getFeatureVec(self, time: pd.Timestamp) -> torch.Tensor:
+        # time is normed relative to number of days in a year
+        normed_time = time.dayofyear / (365 + time.is_leap_year)
+        fourier_freq = 2 * np.pi
+
+        # cos coefs includes free ratio
+        cos_coefs = [np.cos(fourier_freq * j * normed_time) for j in range(0, self._model_ord + 1)]
+        sin_coefs = [np.sin(fourier_freq * j * normed_time) for j in range(1, self._model_ord + 1)]
+
+        return torch.DoubleTensor(cos_coefs + sin_coefs)
     
 
 # Models using abs()
 
-...
+class lambdaAbsFouirer(lambdaFouirer):
+    def __init__(self, promotion_init: float, coefs_init: torch.DoubleTensor):
+        """ the same model as lambdaFouirer, but envelopes lambda function in abs().
+                Does not require positivity of the coeffs
+        """
+        super().__init__(promotion_init, coefs_init)
+
+    def forward(self, series: pd.DataFrame) -> torch.Tensor:
+        return torch.abs(super().forward(series))

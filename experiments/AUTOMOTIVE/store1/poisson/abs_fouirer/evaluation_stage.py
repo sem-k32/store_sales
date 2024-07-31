@@ -13,7 +13,7 @@ import pathlib
 from yaml import full_load
 
 # src is already in PYTHONPATH
-from src.poisson.lambda_fun import lambdaAbsPolySpline
+from src.poisson.lambda_fun import lambdaAbsFouirer
 from src.poisson.regression import PoissonRegr
 from src.poisson.trainer import Trainer
 
@@ -21,12 +21,8 @@ from src.poisson.trainer import Trainer
 def promotionInitializer() -> float:
     return 1.0
 
-def polyInitializer(order: int) -> list[torch.Tensor]:
-    NUM_MONTHS = 12
-    return [
-        1e-1 * torch.ones(order + 1, dtype=torch.float64)
-        for _ in range(NUM_MONTHS)
-    ]
+def foiurerInitializer(order: int) -> torch.Tensor:
+    return torch.ones(2 * order + 1, dtype=torch.float64)
 
 def paramsNormGradient(lambda_func) -> float:
     with torch.no_grad():
@@ -47,9 +43,9 @@ if __name__ == "__main__":
     validate_data = pd.read_csv("exp_data/validate.csv")
 
     # init model
-    lambda_func = lambdaAbsPolySpline(
+    lambda_func = lambdaAbsFouirer(
         promotionInitializer(),
-        polyInitializer(params_dict["poly_ord"])
+        foiurerInitializer(params_dict["model_ord"])
     )
     regressor = PoissonRegr(lambda_func)
 

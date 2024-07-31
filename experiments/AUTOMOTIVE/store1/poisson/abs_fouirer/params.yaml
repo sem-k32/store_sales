@@ -1,8 +1,8 @@
 family: AUTOMOTIVE
 store_nbr: 1
 validate_data_date: 01-01-2017
-poly_ord: 2
-lr: 0.1
+model_ord: 15
+lr: 0.01
 momentum: 0.2
 max_epochs: 60
 grad_tol: 0.1
