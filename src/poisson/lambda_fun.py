@@ -91,6 +91,19 @@ class lambdaCosineSpline(lambdaLinearSpline):
         cos_coefs = [np.cos(fourier_freq * j * normed_time) ** 2 for j in range(1, self._model_ord)]
 
         return torch.DoubleTensor(cos_coefs)
+    
+
+# Abs variation of linear models
+
+class lambdaAbsPolySpline(lambdaPolySpline):
+    def __init__(self, promotion_init: float, coefs_init: list[torch.DoubleTensor]) -> None:
+        """ the same model as lambdaPolySpline, but envelopes lambda function in abs().
+                Does not require positivity of the coeffs
+        """
+        super().__init__(promotion_init, coefs_init)
+
+    def forward(self, series: pd.DataFrame) -> torch.Tensor:
+        return torch.abs(super().forward(series))
 
 
 # Linear models

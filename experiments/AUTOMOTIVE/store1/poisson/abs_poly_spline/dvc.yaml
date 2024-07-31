@@ -1,0 +1,30 @@
+params:
+- params.yaml
+stages:
+  data_preprocessing:
+    cmd: python preprocess_stage.py
+    params:
+    - data_dir
+    - store_nbr
+    - family
+    - validate_data_date
+    deps:
+    - ${WD}/src/data/preprocessing.py
+    - ${WD}/data
+    outs:
+    - ${data_dir}
+  model_evaluation:
+    cmd: python evaluation_stage.py
+    params:
+    - params.yaml:
+    deps:
+    - ${data_dir}
+    - ${WD}/src/poisson
+    outs:
+    - ${eval_results_dir}
+metrics:
+- results/metrics.json
+plots:
+- results/plots/metrics:
+    x: step
+- results/plots/images

@@ -29,7 +29,7 @@ stages:
     deps:
     - path: ../../../../../src/poisson
       hash: md5
-      md5: f3c9d7084e8abf1546053a3a8011b647.dir
+      md5: f0ed4fe24cf0e4bf116d5189e5daa39f.dir
       size: 31779
       nfiles: 9
     - path: exp_data
@@ -43,15 +43,16 @@ stages:
         data_dir: exp_data
         eval_results_dir: results
         family: AUTOMOTIVE
-        grad_tol: 0.01
+        grad_tol: 0.1
         lr: 0.1
         max_epochs: 60
-        poly_ord: 9
+        momentum: 0.2
+        poly_ord: 4
         store_nbr: 1
         validate_data_date: 01-01-2017
     outs:
     - path: results
       hash: md5
-      md5: c34d69594dadfa4f971f9b50d0433ee8.dir
-      size: 104202
-      nfiles: 6
+      md5: d9e989a6889ddf7707e2fa5279d69b51.dir
+      size: 1445417
+      nfiles: 18

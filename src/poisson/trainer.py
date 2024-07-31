@@ -7,7 +7,7 @@ import torch.optim as optim
 import torch.nn as nn
 from torch.optim.lr_scheduler import LRScheduler
 
-from typing import Callable
+from typing import Callable, Optional
 from tqdm import tqdm
 
 from .regression import PoissonRegr
@@ -19,7 +19,7 @@ class Trainer:
             regression: PoissonRegr,
             train_data: pd.DataFrame,
             optimizer: optim.Optimizer,
-            lr_sched: LRScheduler,
+            lr_sched: Optional[LRScheduler],
             projector,
             max_epochs: int,
             grad_tol: float
@@ -54,7 +54,7 @@ class Trainer:
             return torch.sqrt(grad_norm).item()
 
     def Train(self, epoch_callback: Callable) -> None:
-        epoch_iter = tqdm(range(self._max_epochs), desc="Epoch", leave=False)
+        epoch_iter = tqdm(range(self._max_epochs), desc="Loss: ", leave=False)
         for epoch in epoch_iter:
             self._optimizer.zero_grad()
             neg_ln_lk = self._regression.negLnLiklyhood(self._train_data)
@@ -65,8 +65,13 @@ class Trainer:
                 epoch_callback(epoch, self._regression, neg_ln_lk.item())
 
             self._optimizer.step()
-            self._lr_sched.step()
-            self._projector.Project()
+            if self._lr_sched is not None:
+                self._lr_sched.step()
+            if self._projector is not None:
+                self._projector.Project()
+
+            # debug
+            epoch_iter.set_description(f"Loss: {neg_ln_lk.item()}")
 
             # break condition
             if self._paramsNormGradient() < self._grad_tol:
