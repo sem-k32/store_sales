@@ -1,6 +1,10 @@
 params:
 - params.yaml
 stages:
+  setup:
+    cmd: python setup.py
+    deps:
+      - setup.py
   data_preprocessing:
     cmd: python preprocess_stage.py
     params:
@@ -24,9 +28,3 @@ stages:
     - evaluation_stage.py
     outs:
     - ${eval_results_dir}
-metrics:
-- results/metrics.json
-plots:
-- results/plots/metrics:
-    x: step
-- results/plots/images

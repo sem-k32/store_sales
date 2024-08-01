@@ -24,7 +24,7 @@ def promotionInitializer() -> float:
 def polyInitializer(order: int) -> list[torch.Tensor]:
     NUM_MONTHS = 12
     return [
-        1e-1 * torch.ones(order + 1, dtype=torch.float64)
+        torch.ones(order + 1, dtype=torch.float64)
         for _ in range(NUM_MONTHS)
     ]
 
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     for key, param in model_state_dict.items():
         print(key, param)
 
-    # vizualize validation solution
+    # vizualize solution
 
     observations = validate_data["sales"].values
     prediction = regressor.getLambdas(validate_data).numpy()
@@ -143,27 +143,6 @@ if __name__ == "__main__":
     ax.set_ylabel("Sales")
 
     logger.log_image("prediction_final.png", fig)
-
-    # vizualize train solution
-
-    observations = train_data["sales"].values
-    prediction = regressor.getLambdas(train_data).numpy()
-    pred_dates = train_data["date"].values.astype("datetime64")
-
-    fig, ax = plt.subplots(figsize=(10, 6))
-
-    ax.plot(pred_dates, observations, label="observe")
-    ax.plot(pred_dates, prediction, label="predict", color="red")
-    ax.fill_between(pred_dates, prediction - np.sqrt(prediction), prediction + np.sqrt(prediction), 
-                    color="orange", alpha=0.6, label="predict_variance"
-    )
-
-    ax.grid(True)
-    ax.legend()
-    ax.set_xlabel("t")
-    ax.set_ylabel("Sales")
-
-    logger.log_image("train_final.png", fig)
 
     # end evaluation stage
     logger.end()

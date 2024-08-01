@@ -1,4 +1,4 @@
-WD: /home/cyrill/store_sales/
+WD: null
 data_dir: exp_data
 eval_results_dir: results
 family: AUTOMOTIVE
