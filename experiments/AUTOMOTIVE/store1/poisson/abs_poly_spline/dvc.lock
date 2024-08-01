@@ -1,0 +1,66 @@
+schema: '2.0'
+stages:
+  data_preprocessing:
+    cmd: python preprocess_stage.py
+    deps:
+    - path: ../../../../../data
+      hash: md5
+      md5: 53330c0085ee4d351c56e940dc13efef.dir
+      size: 124761708
+      nfiles: 7
+    - path: ../../../../../src/data/preprocessing.py
+      hash: md5
+      md5: c5c337778afb925c1e0d3a3d9d9da6cb
+      size: 2160
+    - path: preprocess_stage.py
+      hash: md5
+      md5: 7d66c723f459fc1c17ae2a7b376405bb
+      size: 1814
+    params:
+      params.yaml:
+        data_dir: exp_data
+        family: AUTOMOTIVE
+        store_nbr: 1
+        validate_data_date: 01-01-2017
+    outs:
+    - path: exp_data
+      hash: md5
+      md5: 2ca943f5d5b0bc5454b946275fbe086b.dir
+      size: 77113
+      nfiles: 3
+  model_evaluation:
+    cmd: python evaluation_stage.py
+    deps:
+    - path: ../../../../../src/poisson
+      hash: md5
+      md5: 5516ba768a49a0208f1c6d7066aa1253.dir
+      size: 35529
+      nfiles: 9
+    - path: evaluation_stage.py
+      hash: md5
+      md5: 114c815b4a3be66fcf800836103a27fd
+      size: 4965
+    - path: exp_data
+      hash: md5
+      md5: 2ca943f5d5b0bc5454b946275fbe086b.dir
+      size: 77113
+      nfiles: 3
+    params:
+      params.yaml:
+        WD: /home/cyrill/store_sales/
+        data_dir: exp_data
+        eval_results_dir: results
+        family: AUTOMOTIVE
+        grad_tol: 0.1
+        lr: 0.1
+        max_epochs: 60
+        momentum: 0.2
+        poly_ord: 2
+        store_nbr: 1
+        validate_data_date: 01-01-2017
+    outs:
+    - path: results
+      hash: md5
+      md5: 7c3a261a1a4ed115f183d45cc8e3dbbe.dir
+      size: 1356463
+      nfiles: 18
