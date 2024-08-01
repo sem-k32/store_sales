@@ -134,7 +134,7 @@ if __name__ == "__main__":
     ax.plot(pred_dates, observations, label="observe")
     ax.plot(pred_dates, prediction, label="predict", color="red")
     ax.fill_between(pred_dates, prediction - np.sqrt(prediction), prediction + np.sqrt(prediction), 
-                    color="orange", alpha=0.6, label="predict_dispersion"
+                    color="orange", alpha=0.6, label="predict_variance"
     )
 
     ax.grid(True)
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     ax.set_xlabel("t")
     ax.set_ylabel("Sales")
 
-    logger.log_image("prediction.png", fig)
+    logger.log_image("prediction_final.png", fig)
 
     # end evaluation stage
     logger.end()

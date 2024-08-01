@@ -1,3 +1,5 @@
+""" Poisson lambda parameter approximators
+"""
 import torch
 import torch.nn as nn
 import pandas as pd

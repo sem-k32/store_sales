@@ -1,3 +1,6 @@
+""" Variables projectors used in optimization process.
+    Used when optimization task has projectable bound conditions
+"""
 import torch
 from .lambda_fun import lambdaLinear, lambdaLinearSpline
 from typing import Union

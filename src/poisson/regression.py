@@ -9,6 +9,12 @@ from functools import reduce
 
 class PoissonRegr:
     def __init__(self, lambda_func: nn.Module) -> None:
+        """the class gives a liklyhood function to poisson data model and gives a lambda parameter for given 
+            time and the time's additional info
+
+        Args:
+            lambda_func (nn.Module): approximator of the poisson's lambda parameter
+        """
         self._lambd_func = lambda_func
 
     def negLnLiklyhood(self, time_info: pd.DataFrame) -> torch.Tensor:

@@ -1,4 +1,5 @@
-""" every trainer is specific (relative to models, data and other features)
+""" gradient optimization cycle-object.
+    Every trainer is specific (relative to models, data and other features)
 """
 import numpy as np
 import pandas as pd

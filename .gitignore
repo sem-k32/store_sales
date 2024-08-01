@@ -1,6 +1,9 @@
 .git
 .venv
-img/examples
+img/series_examples/*
+!img/series_examples/AUTOMOTIVE
 *.pyc
 /data
 .vscode
+experiments/AUTOMOTIVE/script.py
+/vizualize.ipynb
