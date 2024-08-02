@@ -20,13 +20,13 @@ stages:
       params.yaml:
         data_dir: exp_data
         family: AUTOMOTIVE
-        store_nbr: 2
+        store_nbr: 5
         validate_data_date: 01-01-2017
     outs:
     - path: exp_data
       hash: md5
-      md5: 725e3f81f561eff1dc7daf7aca2db4c7.dir
-      size: 77298
+      md5: bd56a995cac454cc87b575bdc2344bba.dir
+      size: 77465
       nfiles: 3
   model_evaluation:
     cmd: python evaluation_stage.py
@@ -42,8 +42,8 @@ stages:
       size: 5646
     - path: exp_data
       hash: md5
-      md5: 725e3f81f561eff1dc7daf7aca2db4c7.dir
-      size: 77298
+      md5: bd56a995cac454cc87b575bdc2344bba.dir
+      size: 77465
       nfiles: 3
     params:
       params.yaml:
@@ -56,11 +56,11 @@ stages:
         max_epochs: 60
         momentum: 0.2
         poly_ord: 2
-        store_nbr: 2
+        store_nbr: 5
         validate_data_date: 01-01-2017
     outs:
     - path: results
       hash: md5
-      md5: 544824d41cf33260727f739e88aa6c1d.dir
-      size: 241970
+      md5: 420ca9148ce3ec32b45d3b4cec3099dc.dir
+      size: 257762
       nfiles: 7
