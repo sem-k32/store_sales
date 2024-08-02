@@ -8,3 +8,4 @@ data
 experiments/AUTOMOTIVE/script.py
 experiments/AUTOMOTIVE/abs_poly_spline
 /vizualize.ipynb
+experiments/experiment_draft.ipynb
