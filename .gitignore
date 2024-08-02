@@ -3,7 +3,7 @@
 img/series_examples/*
 !img/series_examples/AUTOMOTIVE
 *.pyc
-data
+data/
 .vscode
 experiments/AUTOMOTIVE/script.py
 experiments/AUTOMOTIVE/abs_poly_spline
